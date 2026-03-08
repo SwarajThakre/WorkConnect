@@ -1,0 +1,150 @@
+.App-header h1 {
+  text-align: center;
+  font-size: 2.5em;
+  color: white;
+}
+
+.form {
+  padding: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 475px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+}
+
+h2 {
+  color: rgb(6, 112, 211);
+  font-weight: bold;
+  font-size: xx-large;
+  text-align: center;
+  padding: 0 0 20px 0;
+}
+
+label {
+  font-size: 1.2em;
+  margin: 5px;
+  color: black;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="tel"],
+select {
+  width: 95%;
+  margin: 6px 7px;
+  height: 45px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type="text/email"] {
+  width: 95%;
+  margin: 16px 7px;
+  height: 45px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.query a {
+  margin: 45px 2px;
+  padding: 16px 30px;
+  text-decoration: none;
+  color: rgb(48, 111, 228);
+}
+Button[type="submit"] {
+  appearance: none;
+  background-color: #334eac;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,
+    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, rgba(58, 65, 111, 0.5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  font-family: "JetBrains Mono", monospace;
+  height: 48px;
+  width: 450px;
+  text-align: center;
+  line-height: 1;
+  list-style: none;
+  outline: none;
+  overflow: hidden;
+  padding: 16px 32px;
+  margin: 25px 0;
+  text-decoration: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow, transform;
+  font-size: 18px;
+  -webkit-transition: box-shadow 0.15s, transform 0.15s;
+  -moz-transition: box-shadow 0.15s, transform 0.15s;
+  -ms-transition: box-shadow 0.15s, transform 0.15s;
+  -o-transition: box-shadow 0.15s, transform 0.15s;
+}
+
+input[type="submit"]:hover {
+  background-color: #7096d1;
+}
+
+/* input[type="submit"]:focus {
+  box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px,
+    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+input[type="submit"]:active {
+  box-shadow: #3c4fe0 0 3px 7px inset;
+  transform: translateY(2px);
+} */
+
+.form-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 475px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+.backtologin a {
+  margin: 45px 2px;
+  padding: 16px 30px;
+  text-decoration: none;
+  color: rgb(48, 111, 228);
+}
+
+/* .error {
+  text-align: center;
+  color: red;
+} */
+
+.not-found-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.not-found-container h1 {
+  font-size: 100px;
+}
+
+.not-found-container p {
+  font-size: 24px;
+  margin-top: 10px;
+}
