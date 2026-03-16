@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
 
@@ -6,6 +6,11 @@ import { AuthContext } from "../../context/AuthContext";
 function AllUser() {
   const { user } = useContext(AuthContext);
   const { potentialChats, createChat ,onlineUsers } = useContext(ChatContext);
+
+  const onlineUserIds = useMemo(() => {
+    return new Set((onlineUsers ?? []).map((u) => u?.userid).filter(Boolean));
+  }, [onlineUsers]);
+
   return (
     <>
       <div className="all-users">
@@ -15,12 +20,15 @@ function AllUser() {
             return (
               <div
                 className="single-user"
-                key={index}
-                onClick={() => createChat(user.id, u.userid)}  // Check this line
+                key={u?.userid ?? index}
+                onClick={() => {
+                  if (!user?.id || !u?.userid) return;
+                  createChat(user.id, u.userid);
+                }}
               >
                 {u.fullname}
                 <span className={
-                  onlineUsers?.some((user) => user?.userid === u?.userid) 
+                  onlineUserIds.has(u?.userid) 
                   ?"user-online" : ""}></span>
               </div>
             );

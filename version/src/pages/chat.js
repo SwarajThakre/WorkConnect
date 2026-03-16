@@ -19,11 +19,10 @@ const Chat = () => {
         <Stack direction="horizontal" gap={4} className="align-items-start">
           <Stack className="messages-box flex-grow-0 pe-3" gap={3}>
             {isUserChatsLoading && <p>Fetching Chats..</p>}
-            {(!isUserChatsLoading && !userChats) ||
-              (!userChats?.length === 0 && <p>No Chats..</p>)}
+            {!isUserChatsLoading && userChats?.length === 0 && <p>No Chats..</p>}
             {userChats?.map((chat, index) => {
               return (
-                <div key={index} onClick={() => updateCurrentChat(chat)}>
+                <div key={chat?.id ?? index} onClick={() => updateCurrentChat(chat)}>
                   <UserCard chat={chat} user={user} />
                 </div>
               );

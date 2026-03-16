@@ -46,7 +46,7 @@ function Login() {
     setIsAlertVisible(true);
     const isValid = validateLogin();
     if (isValid) {
-      authenticate(email, e, password);
+      authenticate(email, password);
     }
   };
 

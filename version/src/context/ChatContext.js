@@ -1,4 +1,4 @@
-import { createContext,useEffect,useState,useCallback, useContext } from "react";
+import { createContext, useEffect, useState, useCallback, useContext, useMemo } from "react";
 import { baseUrl,postRequest, getRequest } from "../utilities/service";
 import { AuthContext } from "./AuthContext";
 import {io} from 'socket.io-client'
@@ -8,12 +8,12 @@ export const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
     const {user} = useContext(AuthContext)
-    const [userChats, setUserChats] = useState(null);
+    const [userChats, setUserChats] = useState([]);
     const [isUserChatsLoading, setIsUserChatsLoading] = useState(false);
     const [userChatsError, setUserChatsError] = useState(null);
     const [potentialChats, setPotentialChats] = useState([]);
     const [currentChat,setCurrentChat] = useState(null);
-    const [messages, setMessages] = useState(null);
+    const [messages, setMessages] = useState([]);
     const [messagesError, setMessagesError] = useState(null);
     const [isMessagesLoading, setIsMessagesLoading] = useState(false);
     const [sendTextMessageError, setSendTextMessageError] = useState(null);
@@ -26,34 +26,37 @@ export const ChatContextProvider = ({ children }) => {
 
       // initialize socket
   useEffect(() => {
-    const newSocket = io("http://localhost:3001");
+    const newSocket = io(process.env.REACT_APP_SOCKET_URL ?? "http://localhost:3001");
     setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
     };
-  }, [user]);
+  }, []);
 
   // getOnlineUsers
   useEffect(() => {
     if (socket === null) return;
-    socket.emit("addNewUsers", user?.id);
+    if (!user?.id) return;
+
+    socket.emit("addNewUsers", user.id);
     socket.on("getOnlineUsers" , (res) =>{
         setOnlineUsers(res)
     });
     return () => {
       socket.off('getOnlineUsers');
     };
-    // eslint-disable-next-line
-  }, [socket]);
+  }, [socket, user?.id]);
 
   //sendMessagestoserver
   useEffect(() => {
     if (socket === null) return;
+    if (!newMessage) return;
+    if (!currentChat?.members || !user?.id) return;
+
     const recipientId = currentChat?.members.find((id) => id !== user?.id);
     socket.emit("sendMessage",{...newMessage, recipientId})
-    // eslint-disable-next-line
-  }, [newMessage]);
+  }, [socket, newMessage, currentChat?.members, user?.id]);
 
   //get message and notification
   useEffect(() => {
@@ -61,7 +64,7 @@ export const ChatContextProvider = ({ children }) => {
     
     socket.on("getMessage", (res) => {
       if (currentChat?.id !== res.chatid) return;
-      setMessages((prev) => [...prev, res]);
+      setMessages((prev) => [...(prev ?? []), res]);
     });
 
     socket.on("getNotification", (res) => {
@@ -82,33 +85,44 @@ export const ChatContextProvider = ({ children }) => {
     //get All user
     useEffect(()=>{
         const getUsers = async() => {
+          if (!user?.id) {
+            setPotentialChats([]);
+            setAllUsers([]);
+            return;
+          }
+
           const response = await getRequest(`${baseUrl}/users`);
 
           if(response.error){
             return console.log("Error fetching users:", response);
           }
-          const pChats = response.filter((u)=>{ 
-            let isChatCreated = false;
 
-            if(user?.id === u.userid) return false;
-
-            if(userChats){
-              isChatCreated = userChats?.some((chat)=>{
-                return chat.members[0] === u.userid || chat.members[1] === u.userid
-              })
+          const chattedUserIds = new Set();
+          for (const chat of userChats ?? []) {
+            for (const memberId of chat?.members ?? []) {
+              if (memberId != null && memberId !== user.id) chattedUserIds.add(memberId);
             }
-            return !isChatCreated
+          }
+
+          const pChats = (response ?? []).filter((u)=>{ 
+            if (user.id === u.userid) return false;
+            return !chattedUserIds.has(u.userid);
           });
           setPotentialChats(pChats)
           setAllUsers(response);
         };
         getUsers();
-        // eslint-disable-next-line
-    },[userChats]);
+    },[user?.id, userChats]);
     
     //Get Message
   useEffect(() => {
     const getMessages = async () => {
+      if (!currentChat?.id) {
+        setMessages([]);
+        setMessagesError(null);
+        return;
+      }
+
       setIsMessagesLoading(true);
 
       try {
@@ -132,16 +146,24 @@ export const ChatContextProvider = ({ children }) => {
   //Get User Chat
     useEffect(() => {
       const getUserChats = async () => {
-        if (user?.id) {
-          setIsUserChatsLoading(true);
-        setUserChatsError(null);
-          const response = await getRequest(`${baseUrl}/chat/${user?.id}`);
-  
-          if (response.error) {
-            return setUserChatsError(response);
-          }
-          setUserChats(response);
+        if (!user?.id) {
+          setUserChats([]);
+          setCurrentChat(null);
+          setNotifications([]);
+          return;
         }
+
+        setIsUserChatsLoading(true);
+        setUserChatsError(null);
+        const response = await getRequest(`${baseUrl}/chat/${user.id}`);
+
+        if (response.error) {
+          setUserChatsError(response);
+          setIsUserChatsLoading(false);
+          return;
+        }
+
+        setUserChats(response ?? []);
         setIsUserChatsLoading(false);
       };
       getUserChats();
@@ -231,32 +253,52 @@ export const ChatContextProvider = ({ children }) => {
       updateCurrentChat(readChat);
       setNotifications(modifiedNotifications);
     },
-    // eslint-disable-next-line
-    []
+    [updateCurrentChat]
   );
-        
+
+  const contextValue = useMemo(() => ({
+    userChats,
+    currentChat,
+    isUserChatsLoading,
+    userChatsError,
+    potentialChats,
+    createChat,
+    updateCurrentChat,
+    messages,
+    messagesError,
+    isMessagesLoading,
+    sendTextMessage,
+    sendTextMessageError,
+    newMessage,
+    onlineUsers,
+    notifications,
+    allUsers,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
+  }), [
+    userChats,
+    currentChat,
+    isUserChatsLoading,
+    userChatsError,
+    potentialChats,
+    createChat,
+    updateCurrentChat,
+    messages,
+    messagesError,
+    isMessagesLoading,
+    sendTextMessage,
+    sendTextMessageError,
+    newMessage,
+    onlineUsers,
+    notifications,
+    allUsers,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
+  ]);
+
     return (
       <ChatContext.Provider
-        value={{
-          userChats,
-          currentChat,
-          isUserChatsLoading,
-          userChatsError,
-          potentialChats,
-          createChat,
-          updateCurrentChat,
-          messages,
-          messagesError,
-          isMessagesLoading,
-          sendTextMessage,
-          sendTextMessageError,
-          newMessage,
-          onlineUsers,
-          notifications,
-          allUsers,
-          markAllNotificationsAsRead,
-          markNotificationAsRead
-        }}
+        value={contextValue}
       >
         {children}
       </ChatContext.Provider>
